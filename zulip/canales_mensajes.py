@@ -1,6 +1,12 @@
 import zulip
 
-client = zulip.Client(config_file=".zuliprc")
+try:
+    client = zulip.Client(config_file=".zuliprc")
+except zulip.ConfigNotFoundError:
+    print("Falta descargar el archivo .zuliprc con tu sesion de Zulip")
+    print("Se descarga de https://famaf.zulipchat.com/#settings/account-and-privacy")
+    print('Abajo hay un boton que dice "Mostrar clave de API" y tiene la opcion de descargar el .zuliprc')
+    
 
 members = client.get_members()["members"]
 

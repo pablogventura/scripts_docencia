@@ -117,6 +117,9 @@ if __name__ == "__main__":
             result.append(stream)
     print(result)
 
+
+#for canal in ['redes24g02', 'redes24g07', 'redes24g10', 'redes24g12', 'redes24g17', 'redes24g24', 'redes24g27', 'redes24g42', 'redes24g51']:
+#    send_message(canal, "Labs", f"hola @**all**, paso a avisar que los laboratorios estan aprobados :tada:, no tengo la nota porque la idea es charlar entre los profes antes de fijarlas. Pero ya les voy a estar avisando apenas este eso.")
 #La siguiente linea crea un stream privado que se llama "Canal de prueba" con los usuarios de esos mails suscriptos
 #create_private_stream("Canal-de-prueba",["otro@gmail.com", "yo@gmail.com"])
 

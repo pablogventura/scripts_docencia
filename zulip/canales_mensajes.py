@@ -1,7 +1,24 @@
+"""zulipscript
+
+Usage:
+  zulipscript.py broadcast <msg> [--subject=<sbj>] [--stream-filter=<filter>]
+  zulipscript.py list_streams [--stream-filter=<filter>]
+  zulipscript.py (-h | --help)
+  zulipscript.py --version
+
+Options:
+  -h --help                   Show this screen.
+  --version                   Show version.
+  --subject=<sbj>             Subject where to send messages [default: General].
+  [--stream-filter=<filter>]  Streams where to send messages [default: all].
+
+
+"""
+from docopt import docopt
 import zulip
 
 try:
-    client = zulip.Client(config_file="zuliprc")
+    client = zulip.Client(config_file=".zuliprc")
 except zulip.ConfigNotFoundError:
     print("Falta descargar el archivo .zuliprc con tu sesion de Zulip")
     print("Se descarga de https://famaf.zulipchat.com/#settings/account-and-privacy")
@@ -95,31 +112,36 @@ def send_message(stream_name, subject, content):
         print(f"Error enviando mensaje: {response['msg']}")
     return response
 
-def get_subscribed_streams():
+def get_subscribed_streams(stream_filter=None):
     """
     Devuelve una lista de todos los canales a los que el usuario está suscripto.
     """
     result = client.get_subscriptions()
     if result['result'] == 'success':
-        streams = [subscription['name'] for subscription in result['subscriptions']]
-        return streams
+        all_streams = [subscription['name'] for subscription in result['subscriptions']]
+        if stream_filter and stream_filter != "all":
+            return [stream for stream in all_streams if stream_filter in stream]
+        return all_streams
     else:
         print(f"Error obteniendo suscripciones: {result['msg']}")
         return []
 
 # Ejemplo de uso
 if __name__ == "__main__":
-    streams = get_subscribed_streams()
-    print("Estás suscripto a los siguientes canales:")
-    result = []
-    for stream in streams:
-        if "REDES" in stream.upper():
-            result.append(stream)
-    print(result)
+    arguments = docopt(__doc__, version='ZulipScript 2.0')
+    if arguments["list_streams"]:
+        streams = get_subscribed_streams(arguments["--stream-filter"])
+        print("Estás suscripto a los siguientes canales:")
+        print(streams)
+    elif arguments["broadcast"]:
+        streams = get_subscribed_streams(arguments["--stream-filter"])
+        subject = arguments["--subject"]
+        msg = arguments["<msg>"]
+        for stream in streams:
+            # print(f'send_message("{stream}", "{subject}", "{msg}")')
+            send_message(stream, subject, msg)
 
 
-#for canal in ['redes24g02', 'redes24g07', 'redes24g10', 'redes24g12', 'redes24g17', 'redes24g24', 'redes24g27', 'redes24g42', 'redes24g51']:
-#    send_message(canal, "Labs", f"hola @**all**, paso a avisar que los laboratorios estan aprobados :tada:, no tengo la nota porque la idea es charlar entre los profes antes de fijarlas. Pero ya les voy a estar avisando apenas este eso.")
 #La siguiente linea crea un stream privado que se llama "Canal de prueba" con los usuarios de esos mails suscriptos
 #create_private_stream("Canal-de-prueba",["otro@gmail.com", "yo@gmail.com"])
 
